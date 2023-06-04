@@ -5,68 +5,68 @@
 ## Tabela de Conteúdos
 
 - [Visão Geral](#1-visão-geral)
-- [Início Rápido](#2-início-rápido)
-    - [Instalando Dependências](#21-instalando-dependências)
-    - [Variáveis de Ambiente](#22-variáveis-de-ambiente)
-    - [Migrations](#24-migrations)
+- [Configurações Necessárias](#2-configurações-necessárias)
 - [Endpoints](#3-endpoints)
 
 ---
 
 ## 1. Visão Geral
 
-Visão geral do projeto, um pouco das tecnologias usadas.
+Visão geral do projeto, um pouco das tecnologias utilizadas.
 
 - [PHP](https://www.php.net/)
 - [Laravel](https://laravel.com/)
+- [Docker](https://docker.com/)
 
 ---
 
-## 2. Início Rápido
+## 2. Configurações Necessárias
 
-### 2.1. Instalando Dependências
-
-Clone o projeto em sua máquina e instale as dependências com o comando:
+Clone o projeto e copie o arquivo **.env.example** para **.env** com o seguinte comando:
 
 ```shell
-composer update
+cp .env.example .env
 ```
 
-### 2.2. Variáveis de Ambiente
-
-Em seguida, crie um arquivo **.env**, copiando o formato do arquivo **.env.example** e configure no arquivo o login como desejar utilizar:
+Em seguida, no arquivo **.env**, preencha os campos como do exemplo abaixo como desejar:
 ```
 USER_LOGIN=
 USER_PASSWORD=
 ```
 
-Configure suas variáveis de ambiente com suas credenciais do MySQL e uma nova database da sua escolha:
+Em seguida suba as imagens do docker com o seguinte comando:
 ```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=
-DB_USERNAME=
-DB_PASSWORD=
+docker compose up -d
 ```
 
-### 2.3. Após configurar as variáveis de ambiente, configure o JWT Secret com o seguinte comando:
-```shell
+Logo após, abra o terminal no container criado:
+```
+docker compose exec -it clickideia bash
+```
+
+Dentro do terminal, execute a instalação das dependências:
+```
+composer install
+```
+
+Assim que terminar, gere uma KEY para o APP:
+```
+php artisan key:generate
+```
+
+Agora gere uma **JWT SECRET**:
+```
 php artisan jwt:secret
 ```
 
-### 2.4. Migrations
-
-Execute as migrations com o comando:
-
+E por último, vamos rodar as migrations:
 ```
-php artisan migrate:fresh --seed
+php artisan migrate --seed
 ```
 
 ---
 
 ## 3. Endpoints
-### Obs.: TODOS OS ENDPOINTS DE CARDS REQUEREM UM TOKEN JWT.
 
 [ Voltar para o topo ](#tabela-de-conteúdos)
 
@@ -78,12 +78,12 @@ php artisan migrate:fresh --seed
 	- [POST - /cards](#21-criação-de-card)
 	- [GET - /cards](#22-listando-cards)
 	- [PUT - /cards/:id](#23-update-card)
-	- [DELETE - /cards/:id](#25-delete-card)
+	- [DELETE - /cards/:id](#24-delete-card)
 
 ---
 
 ## 1. **Login**
-[ Voltar para os Endpoints ](#5-endpoints)
+[ Voltar para os Endpoints ](#3-endpoints)
 
 ### Endpoints
 
@@ -93,24 +93,32 @@ php artisan migrate:fresh --seed
 
 ---
 
-### 1.1. **Login usuário**
+### 1.1. **Login de Usuário**
 
-[ Voltar aos Endpoints ](#5-endpoints)
+[ Voltar aos Endpoints ](#3-endpoints)
 
 ### `/login`
 
 ### Corpo da Requisição:
 ```json
 {
-	"username": "test",
-	"password": "test@1234",
+	"username": "clickideia",
+	"password": "clk@123",
 }
 ```
-### Após o login ser realizado com sucesso será retornado um TOKEN JWT.
+
+### Corpo da Resposta:
+```json
+{
+	"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNjg1OTA3MjMxLCJleHAiOjE2ODU5MTA4MzEsIm5iZiI6MTY4NTkwNzIzMSwianRpIjoiRG9KZ1N0NFk0R0ZQY25URiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.QwEaMBf_HXCo9h3v3KjEcNbgHCRjWN2tMSckEP9Owcw",
+	"token_type": "bearer",
+	"expires_in": 3600
+}
+```
 
 
 ## 2. **Cards**
-[ Voltar para os Endpoints ](#5-endpoints)
+[ Voltar para os Endpoints ](#3-endpoints)
 
 ### Endpoints
 
@@ -125,7 +133,7 @@ php artisan migrate:fresh --seed
 
 ### 2.1. **Criação de Card**
 
-[ Voltar para os Endpoints ](#5-endpoints)
+[ Voltar para os Endpoints ](#3-endpoints)
 
 ### `/cards`
 
@@ -138,9 +146,21 @@ php artisan migrate:fresh --seed
 }
 ```
 
+### Corpo da Resposta:
+```json
+{
+	"titulo": "Teste",
+	"conteudo": "Testando",
+	"lista": "Teste",
+	"updated_at": "2023-06-04T19:36:42.000000Z",
+	"created_at": "2023-06-04T19:36:42.000000Z",
+	"id": 1
+}
+```
+
 ### 2.2. **Listando Cards**
 
-[ Voltar aos Endpoints ](#5-endpoints)
+[ Voltar aos Endpoints ](#3-endpoints)
 
 ### `/cards`
 
@@ -149,24 +169,58 @@ php artisan migrate:fresh --seed
 GET /cards
 ```
 
+### Corpo da Resposta:
+```json
+[
+	{
+		"id": 1,
+		"titulo": "Teste",
+		"conteudo": "Testando",
+		"lista": "Teste",
+		"created_at": "2023-06-04T19:36:42.000000Z",
+		"updated_at": "2023-06-04T19:36:42.000000Z"
+	},
+	{
+		"id": 2,
+		"titulo": "Teste2",
+		"conteudo": "Testando2",
+		"lista": "Teste2",
+		"created_at": "2023-06-04T19:39:21.000000Z",
+		"updated_at": "2023-06-04T19:39:21.000000Z"
+	}
+]
+```
+
 ### 2.3. **Update card**
 
-[ Voltar aos Endpoints ](#5-endpoints)
+[ Voltar aos Endpoints ](#3-endpoints)
 
 ### `/cards/:id`
 
 ### Corpo da Requisição:
 ```json
 {
-	"titulo": "Teste",
-	"conteudo": "Testando",
-	"lista": "Teste"
+	"titulo": "Teste1",
+	"conteudo": "Testando1",
+	"lista": "Teste1"
 }
 ```
 
-### 2.5. **Delete card**
+### Corpo da Resposta:
+```json
+{
+	"id": 1,
+	"titulo": "Teste1",
+	"conteudo": "Testando1",
+	"lista": "Teste1",
+	"created_at": "2023-06-04T19:36:42.000000Z",
+	"updated_at": "2023-06-04T19:42:09.000000Z"
+}
+```
 
-[ Voltar aos Endpoints ](#5-endpoints)
+### 2.4. **Delete card**
+
+[ Voltar aos Endpoints ](#3-endpoints)
 
 ### `/cards/:id`
 
